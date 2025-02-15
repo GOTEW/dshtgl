@@ -32,17 +32,13 @@
         >
       </el-row>
       <!-- 用户列表区域 -->
-      <el-table :data="this.userList" :border="true" stripe="">
+      <el-table :data="this.userList" :border="true" stripe max-height="750">
         <el-table-column type="index"></el-table-column>
-        <el-table-column prop="username" label="姓名" width="180">
-        </el-table-column>
-        <el-table-column prop="email" label="邮箱" width="180">
-        </el-table-column>
-        <el-table-column prop="mobile" label="手机" width="180">
-        </el-table-column>
-        <el-table-column prop="role_name" label="角色" width="180">
-        </el-table-column>
-        <el-table-column label="状态" width="180">
+        <el-table-column prop="username" label="姓名"> </el-table-column>
+        <el-table-column prop="email" label="邮箱"> </el-table-column>
+        <el-table-column prop="mobile" label="手机"> </el-table-column>
+        <el-table-column prop="role_name" label="角色"> </el-table-column>
+        <el-table-column label="状态">
           <template slot-scope="scope">
             <el-switch
               v-model="scope.row.mg_state"
@@ -51,7 +47,7 @@
             </el-switch>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180">
+        <el-table-column label="操作">
           <template slot-scope="scope">
             <!-- 修改按钮 -->
             <el-button
@@ -283,7 +279,12 @@ export default {
       // 所有角色数据列表
       rolesList: [],
       // 已选中分配新角色的id
-      selectedRoleId: ''
+      selectedRoleId: '',
+      // 保存编辑用户信息前的对象
+      editUserFormer: {
+        emailformer: '',
+        mobileformer: ''
+      }
     }
   },
   created () {
@@ -301,7 +302,6 @@ export default {
     },
     // 监听pagesize改变事件
     handleSizeChange (newSize) {
-      console.log(newSize)
       this.queryInfo.pagesize = newSize
       this.getUserList()
     },
@@ -348,16 +348,22 @@ export default {
         return this.$message.error('查询用户信息失败')
       }
       this.editForm = res.data
+      this.editUserFormer.emailformer = res.data.email
+      this.editUserFormer.mobileformer = res.data.mobile
       this.editdialogVisible = !this.editdialogVisible
     },
-    // 监听修改用户信息的对话框
+    // 监听修改用户信息的对话框关闭事件
     editdialogClose () {
       this.$refs.editFormRef.resetFields()
     },
     // 修改用户信息并提交
     editUserinfo () {
       this.$refs.editFormRef.validate(async valid => {
-        if (!valid) return
+        if (
+          !valid ||
+          (this.editUserFormer.mobileformer === this.editForm.mobile &&
+            this.editUserFormer.emailformer === this.editForm.email)
+        ) return
         // 发起修改用户请求
         const { data: res } = await this.$http.put(
           'users/' + this.editForm.id,

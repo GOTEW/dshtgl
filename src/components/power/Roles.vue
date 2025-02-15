@@ -17,7 +17,7 @@
         </el-col>
       </el-row>
       <!-- 角色列表区域 -->
-      <el-table :data="rolelist" stripe border>
+      <el-table :data="rolelist" stripe :border="true" max-height="750">
         <!-- 展开列 -->
         <el-table-column type="expand">
           <template slot-scope="scope">
@@ -210,7 +210,12 @@ export default {
       // 默认展开的数组
       defKeys: [],
       // 角色授权id
-      roleId: ''
+      roleId: '',
+      // 点击编辑按钮保存编辑前的旧数据
+      editRoleformer: {
+        roleDescformer: '',
+        roleNameformer: ''
+      }
     }
   },
   created () {
@@ -251,19 +256,24 @@ export default {
         this.getRoleList()
       })
     },
-    // 查询角色信息
+    // 展示编辑角色对话框
     async editRole (id) {
       const { data: res } = await this.$http.get('roles/' + id)
       if (res.meta.status !== 200) {
         return this.$message.error('查询角色失败')
       }
       this.editrole = res.data
+      console.log(res.data)
+      this.editRoleformer.roleDescformer = res.data.roleDesc
+      this.editRoleformer.roleNameformer = res.data.roleName
       this.editdialogVisible = !this.editdialogVisible
     },
     // 监听修改角色对话框隐藏
     editRoleinfo () {
       this.$refs.editruleFormRef.validate(async valite => {
-        if (!valite) return
+        if (
+          !valite ||
+          (this.editRoleformer.roleDescformer === this.editrole.roleDesc && this.editRoleformer.roleNameformer === this.editrole.roleName)) return
         const { data: res } = await this.$http.put(
           'roles/' + this.editrole.roleId,
           { roleName: this.editrole.roleName, roleDesc: this.editrole.roleDesc }

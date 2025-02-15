@@ -6,6 +6,7 @@
       <el-breadcrumb-item>商品管理</el-breadcrumb-item>
       <el-breadcrumb-item>商品分类</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 卡片视图 -->
     <el-card>
       <el-row>
         <el-col>
@@ -29,7 +30,7 @@
         :expand-type="false"
         show-index
         index-text="#"
-        border
+        border="true"
         :show-row-hover="false"
       >
         <template slot="isok" slot-scope="scope">
@@ -42,7 +43,7 @@
         </template>
         <!-- 排序 -->
         <template slot="order" slot-scope="scope">
-          <el-tag v-if="scope.row.cat_level === 0" size="mine">一级</el-tag>
+          <el-tag v-if="scope.row.cat_level === 0" size="mini">一级</el-tag>
           <el-tag
             type="success"
             size="mini"
@@ -74,7 +75,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="querInfo.pageNum"
-        :page-sizes="[1, 5, 10, 20]"
+        :page-sizes="[1, 5, 10, 15]"
         :page-size="querInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
@@ -116,7 +117,12 @@
       </span>
     </el-dialog>
     <!-- 编辑分类的对话框 -->
-    <el-dialog title="修改分类" :visible.sync="editDialogVisible" width="50%">
+    <el-dialog
+      title="修改分类"
+      :visible.sync="editDialogVisible"
+      width="50%"
+      @close="editCateClose"
+    >
       <el-form
         :model="editCateForm"
         :rules="editCateRule"
@@ -192,7 +198,7 @@ export default {
       addCateRules: {
         cat_name: [
           { required: true, message: '请输入分类名称', trigger: 'blur' },
-          { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+          { min: 2, max: 8, message: '长度在 3 到 8 个字符', trigger: 'blur' }
         ]
       },
       //   父级分类数据列表
@@ -202,28 +208,26 @@ export default {
         value: 'cat_id',
         label: 'cat_name',
         children: 'children',
-        checkStrictly: true
+        checkStrictly: true,
+        expandTrigger: 'hover'
       },
       //   选中的父级id
       selectedKeys: [],
       // 监听编辑对话框的显示与隐藏
       editDialogVisible: false,
       // 编辑分类的对象
-      editCateForm: {
-        // 分类id
-        id: '',
-        // 分类名称
-        cat_name: ''
-      },
+      editCateForm: {},
       // 编辑分类的验证规则对象
       editCateRule: {
         cat_name: [
           { required: true, message: '请输入分类名称', trigger: 'blur' },
-          { min: 3, max: 8, message: '长度在 3 到 8 个字符', trigger: 'blur' }
+          { min: 2, max: 8, message: '长度在 2 到 8 个字符', trigger: 'blur' }
         ]
       },
       // 查询输入框双向绑定的数据
-      Catevalue: ''
+      Catevalue: '',
+      // 保存编辑前的分类名
+      editCateformer: ''
     }
   },
   created () {
@@ -245,7 +249,7 @@ export default {
     },
     // 监听pagesize 的改变
     handleSizeChange (pageSize) {
-      this.querInfo.pageSize = pageSize
+      this.querInfo.pagesize = pageSize
       this.getcategorie()
     },
     // 监听pagenum 的改变
@@ -267,6 +271,7 @@ export default {
       if (res.meta.status !== 200) {
         return this.$message.error('获取分类失败')
       }
+
       this.parentCateList = res.data
     },
     // 级联选择器发生变化触发
@@ -334,22 +339,36 @@ export default {
     },
     // 点击编辑按钮展示编辑分类对话框
     async editCateDialog (editCateValue) {
-      this.editCateForm.id = editCateValue.cat_id
-      this.editCateForm.cat_name = editCateValue.cat_name
-      this.editDialogVisible = true
-    },
-    // 点击按钮，修改编辑分类
-    async editCate () {
-      const { data: res } = await this.$http.put(
-        'categories/' + this.editCateForm.id,
-        { cat_name: this.editCateForm.cat_name }
+      const { data: res } = await this.$http.get(
+        'categories/' + editCateValue.cat_id
       )
       if (res.meta.status !== 200) {
-        return this.$message.error('编辑分类失败')
+        return this.$message.error('获取编辑信息失败')
       }
-      this.$message.success('编辑分类成功')
-      this.getcategorie()
-      this.editDialogVisible = false
+      this.editCateForm = res.data
+      this.editCateformer = res.data.cat_name
+      this.editDialogVisible = true
+    },
+    // 监听修改分类对话框的关闭事件
+    editCateClose () {
+      this.$refs.editCateFormRef.resetFields()
+    },
+    // 点击按钮，修改编辑分类
+    editCate () {
+      this.$refs.editCateFormRef.validate(async valid => {
+        console.log(this.editCateformer === this.editCateForm.cat_name)
+        if (!valid || this.editCateformer === this.editCateForm.cat_name) return
+        const { data: res } = await this.$http.put(
+          'categories/' + this.editCateForm.cat_id,
+          { cat_name: this.editCateForm.cat_name }
+        )
+        if (res.meta.status !== 200) {
+          return this.$message.error('编辑分类失败')
+        }
+        this.$message.success('编辑分类成功')
+        this.getcategorie()
+        this.editDialogVisible = false
+      })
     }
   }
 }
