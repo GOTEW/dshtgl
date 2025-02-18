@@ -30,7 +30,7 @@
         :expand-type="false"
         show-index
         index-text="#"
-        border="true"
+        :border="true"
         :show-row-hover="false"
       >
         <template slot="isok" slot-scope="scope">
@@ -317,7 +317,7 @@ export default {
     // 点击按钮，删除分类
     async deleteCate (id) {
       const confirmResult = await this.$confirm(
-        '此操作将永久删除该文件, 是否继续?',
+        '此操作将永久删除该分类, 是否继续?',
         '提示',
         {
           confirmButtonText: '确定',
@@ -356,7 +356,6 @@ export default {
     // 点击按钮，修改编辑分类
     editCate () {
       this.$refs.editCateFormRef.validate(async valid => {
-        console.log(this.editCateformer === this.editCateForm.cat_name)
         if (!valid || this.editCateformer === this.editCateForm.cat_name) return
         const { data: res } = await this.$http.put(
           'categories/' + this.editCateForm.cat_id,

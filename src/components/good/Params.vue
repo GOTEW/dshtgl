@@ -22,6 +22,7 @@
           <span>选择商品分类：</span>
           <!-- 选择商品分类的级联选择框 -->
           <el-cascader
+            expand-trigger="hover"
             v-model="selectparamsId"
             :options="paramsList"
             @change="paramsChange"
@@ -396,7 +397,7 @@ export default {
     // 点击按钮删除参数
     async deleteParams (id) {
       const confirmText = await this.$confirm(
-        '此操作将永久删除该文件, 是否继续?',
+        '此操作将永久删除该参数, 是否继续?',
         '提示',
         {
           confirmButtonText: '确定',

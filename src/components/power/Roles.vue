@@ -229,7 +229,6 @@ export default {
         return this.$message.error('获取角色列表失败')
       }
       this.rolelist = res.data
-      console.log(res)
     },
     //   重置添加表单验证
     roleClose () {
@@ -263,7 +262,6 @@ export default {
         return this.$message.error('查询角色失败')
       }
       this.editrole = res.data
-      console.log(res.data)
       this.editRoleformer.roleDescformer = res.data.roleDesc
       this.editRoleformer.roleNameformer = res.data.roleName
       this.editdialogVisible = !this.editdialogVisible
@@ -273,7 +271,9 @@ export default {
       this.$refs.editruleFormRef.validate(async valite => {
         if (
           !valite ||
-          (this.editRoleformer.roleDescformer === this.editrole.roleDesc && this.editRoleformer.roleNameformer === this.editrole.roleName)) return
+          (this.editRoleformer.roleDescformer === this.editrole.roleDesc &&
+            this.editRoleformer.roleNameformer === this.editrole.roleName)
+        ) return
         const { data: res } = await this.$http.put(
           'roles/' + this.editrole.roleId,
           { roleName: this.editrole.roleName, roleDesc: this.editrole.roleDesc }
