@@ -312,14 +312,16 @@ export default {
     },
     // 监听switch开关状态的改变
     async userStateChange (userinfo) {
+      console.log(userinfo)
       const { data: res } = await this.$http.put(
-        `users/${userinfo.id}/state/${userinfo.role_name}`
+        `users/${userinfo.id}/state/${userinfo.mg_state}`
       )
       if (res.meta.status !== 200) {
         userinfo.mg_state = !userinfo.mg_state
         return this.$message.error('更新用户状态失败')
       }
       this.$message.success('更新用户状态成功')
+      this.getUserList()
     },
     // 监听添加用户对话框关闭的事件
     addDialogClosed () {
