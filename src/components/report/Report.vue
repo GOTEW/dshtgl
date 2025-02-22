@@ -56,7 +56,7 @@ export default {
   created () {},
   async mounted () {
     // 3.基于准备好的dom，初始化echarts实例
-    var myChart = echarts.init(document.getElementById('main'))
+    const myChart = echarts.init(document.getElementById('main'))
     // 获取图标折线图数据
     const { data: res } = await this.$http.get('reports/type/1')
     if (res.meta.status !== 200) {

@@ -312,7 +312,6 @@ export default {
     },
     // 监听switch开关状态的改变
     async userStateChange (userinfo) {
-      console.log(userinfo)
       const { data: res } = await this.$http.put(
         `users/${userinfo.id}/state/${userinfo.mg_state}`
       )
